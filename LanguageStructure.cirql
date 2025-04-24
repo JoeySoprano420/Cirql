@@ -1,0 +1,8 @@
+>> define name as "Aera"
+>> define count as 3
+
+::loop i from 1 to count::
+    >> echo "Hi, {{name}}, this is round #{{i}}"
+::end::
+
+>> echo "All greetings complete."
