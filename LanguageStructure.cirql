@@ -114,3 +114,13 @@
 
 >> trigger "emergency-breakout"
 
+>> linkTo("Danisha", remote=true)
+>> sendMessage("Prepare scent-detonation at fringe sector.")
+
+::aot::BreachSequence::
+    on "sector-breach" do
+        >> echo "Intrusion confirmed."
+        >> deployArtillery("VioletRain", "Line-A", 5)
+    end
+::end::
+
