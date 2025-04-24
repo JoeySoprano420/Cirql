@@ -54,3 +54,66 @@
   </script>
 </body>
 </html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VACU Tactical Console</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" />
+  <style>
+    body {
+      margin: 0;
+      background-color: #1e1e2f;
+    }
+    #terminal {
+      height: 100vh;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="terminal"></div>
+  <script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
+  <script>
+    const term = new Terminal({
+      cursorBlink: true,
+      theme: {
+        background: '#1e1e2f',
+        foreground: '#e0e0ff'
+      }
+    });
+    term.open(document.getElementById('terminal'));
+    term.write('VACU Tactical Console v1.0\r\n');
+    term.write('Type a CIRQL trigger and press Enter...\r\n> ');
+
+    const socket = new WebSocket(`ws://${location.host}`);
+
+    term.onKey(e => {
+      const char = e.key;
+      if (char === '\r') {
+        const input = term.buffer.active.getLine(term.buffer.active.cursorY).translateToString().split('> ').pop().trim();
+        socket.send(input);
+        term.write('\r\n> ');
+      } else {
+        term.write(char);
+      }
+    });
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.error) {
+        term.write(`\r\n[Error] ${data.error}\r\n> `);
+      } else {
+        term.write(`\r\n[Trigger] ${data.event}\r\n`);
+        term.write(`[Block] ${data.blockName}\r\n`);
+        data.commands.forEach(cmd => {
+          term.write(`→ ${cmd}\r\n`);
+        });
+        term.write('> ');
+      }
+    };
+  </script>
+</body>
+</html>
