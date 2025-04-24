@@ -631,3 +631,301 @@ def run_console():
 if __name__ == "__main__":
     run_console()
 
+import asyncio
+import websockets
+
+async def handle_event(websocket, path):
+    async for message in websocket:
+        trigger_event(message)  # Calls the existing trigger function
+
+start_server = websockets.serve(handle_event, "localhost", 8765)
+asyncio.get_event_loop().run_until_complete(start_server)
+asyncio.get_event_loop().run_forever()
+
+import json
+
+def save_variables():
+    with open("variables.json", "w") as f:
+        json.dump(variables, f)
+
+def load_variables():
+    global variables
+    with open("variables.json", "r") as f:
+        variables = json.load(f)
+
+PLUGINS = {}
+
+def register_plugin(name, func):
+    PLUGINS[name] = func
+
+def execute_plugin(command):
+    if command in PLUGINS:
+        PLUGINS[command]()
+    else:
+        print(f"Plugin '{command}' not found.")
+
+# Example Plugin
+def custom_behavior():
+    print("Executing custom behavior!")
+
+register_plugin("custom_action", custom_behavior)
+execute_plugin("custom_action")
+
+KEYWORDS = {
+    "if", "else", "while", "for", "break", "continue", "return",
+    "define", "struct", "import", "module", "try", "catch", "throw"
+}
+
+OPERATORS = {
+    "+", "-", "*", "/", "%", "**", "&", "|", "^", "<<", ">>",
+    "==", "!=", "<", ">", "<=", ">=", "&&", "||", "!", "?",
+}
+
+PRIMITIVES = {
+    "int": int,
+    "float": float,
+    "bool": bool,
+    "string": str,
+    "list": list,
+    "dict": dict,
+    "set": set,
+}
+
+CONSTRUCTS = {
+    "lambda": lambda x: x * 2,
+    "decorator": "@function_decorator",
+    "anonymous_block": "do {...} while(condition)",
+    "coroutines": "async def fetch_data() {...}",
+    "task_scheduler": "schedule(run_task, every='5s')",
+}
+
+LOGIC_FEATURES = {
+    "state_machine": "transitions between predefined states",
+    "event_driven": "triggers based on external or internal events",
+    "parallel_execution": "multithreading/multiprocessing",
+    "probabilistic_decisions": "AI-based weighted choices",
+    "pattern_matching": "switch-case structures",
+}
+
+import threading
+import time
+
+class AOTInterpreter:
+    def __init__(self):
+        self.trigger_map = {}  # Stores trigger-event bindings
+        self.event_queue = []  # Maintains an execution queue
+        self.active = True  # Global execution state
+
+    def define_trigger(self, trigger_name, event_actions):
+        """Registers an event with its associated actions."""
+        self.trigger_map[trigger_name] = event_actions
+
+    def queue_event(self, trigger_name):
+        """Adds an event to the execution queue."""
+        if trigger_name in self.trigger_map:
+            self.event_queue.append(trigger_name)
+        else:
+            print(f"[ERROR] No linked event for trigger '{trigger_name}'.")
+
+    def execute_events(self):
+        """Executes all queued events sequentially."""
+        while self.active:
+            if self.event_queue:
+                event = self.event_queue.pop(0)
+                print(f"[EXEC] Processing AOT event '{event}'")
+                for action in self.trigger_map[event]:
+                    self.process_action(action)
+            time.sleep(0.1)  # Prevent excessive CPU usage
+
+    def process_action(self, action):
+        """Simulates execution of each action command."""
+        print(f" -> Executing action: {action}")
+        time.sleep(0.5)  # Mock processing time
+
+    def start(self):
+        """Begins the interpreter in a separate execution thread."""
+        threading.Thread(target=self.execute_events, daemon=True).start()
+
+    def stop(self):
+        """Stops all AOT processing."""
+        self.active = False
+        print("[SYSTEM] AOT Interpreter stopped.")
+
+# Example usage:
+aot_interpreter = AOTInterpreter()
+aot_interpreter.define_trigger("sector-breach", [
+    "echo 'Intrusion detected at SECTOR 7-B'",
+    "deployArtillery('VioletRain', 'Line-A', 5)",
+    "alertAllies('Kaeris', 'Danisha')"
+])
+aot_interpreter.define_trigger("emergency-stasis", [
+    "lockdownZones(['Zeta-Fog', 'Crimspire-Dome'])",
+    "engageChronoLoop(duration='88 sec')",
+    "sendAlert('Fadora Cashew')"
+])
+
+aot_interpreter.start()
+
+# Simulating trigger calls
+time.sleep(1)
+aot_interpreter.queue_event("sector-breach")
+time.sleep(2)
+aot_interpreter.queue_event("emergency-stasis")
+
+import threading
+import time
+import random
+
+class ExtremeAOTInterpreter:
+    def __init__(self):
+        self.trigger_map = {}  # Stores triggers
+        self.event_queue = []  # Prioritized execution queue
+        self.active = True  # System state
+        self.execution_threads = {}  # Track parallel threads
+        self.state_memory = {}  # Persistent logic state
+
+    def define_trigger(self, trigger_name, event_actions):
+        """Registers an event with enhanced predictive actions."""
+        self.trigger_map[trigger_name] = event_actions
+        self.state_memory[trigger_name] = "inactive"
+
+    def queue_event(self, trigger_name, priority=5):
+        """Adds an event to the execution queue with priority sorting."""
+        if trigger_name in self.trigger_map:
+            self.event_queue.append((trigger_name, priority))
+            self.event_queue.sort(key=lambda x: x[1], reverse=True)
+        else:
+            print(f"[ERROR] No linked event for trigger '{trigger_name}'.")
+
+    def execute_events(self):
+        """Processes prioritized events in multiple parallel threads."""
+        while self.active:
+            if self.event_queue:
+                event, priority = self.event_queue.pop(0)
+                print(f"[EXEC] Processing AOT event '{event}' with priority {priority}")
+                
+                # Spawn independent execution thread
+                thread = threading.Thread(target=self.process_event, args=(event,))
+                self.execution_threads[event] = thread
+                thread.start()
+                
+            time.sleep(0.05)  # Prevent excessive CPU usage
+
+    def process_event(self, event):
+        """Executes each action asynchronously with state tracking."""
+        self.state_memory[event] = "active"
+        for action in self.trigger_map[event]:
+            execution_time = random.uniform(0.3, 0.7)  # Simulate processing delay
+            print(f" -> Executing action: {action} (processing: {execution_time:.2f}s)")
+            time.sleep(execution_time)
+        self.state_memory[event] = "completed"
+
+    def start(self):
+        """Begins extreme interpreting in a parallel environment."""
+        threading.Thread(target=self.execute_events, daemon=True).start()
+
+    def stop(self):
+        """Gracefully halts execution."""
+        self.active = False
+        print("[SYSTEM] Extreme AOT Interpreter halted.")
+
+# Example usage:
+aot_interpreter = ExtremeAOTInterpreter()
+aot_interpreter.define_trigger("quantum-state-shift", [
+    "echo 'Quantum flux engaged'",
+    "redirectEnergy('Core-72X')",
+    "initializeSubroutine('HyperVector')",
+])
+aot_interpreter.define_trigger("emergency-lockdown", [
+    "engageProtocol('Titanium-Rigidity')",
+    "deployCountermeasure('AmberHorizon')",
+])
+
+aot_interpreter.start()
+time.sleep(1)
+aot_interpreter.queue_event("quantum-state-shift", priority=9)
+time.sleep(2)
+aot_interpreter.queue_event("emergency-lockdown", priority=7)
+
+import re
+
+TOKEN_PATTERNS = {
+    "KEYWORD": r"\b(if|else|for|while|define|return|try|catch|module)\b",
+    "OPERATOR": r"[\+\-\*/%=!&|<>]+",
+    "NUMBER": r"\b\d+(\.\d+)?\b",
+    "STRING": r"\".*?\"",
+    "IDENTIFIER": r"\b[a-zA-Z_][a-zA-Z0-9_]*\b",
+    "PUNCTUATION": r"[\(\)\{\}
+
+\[\]
+
+;,]"
+}
+
+def lexer(code):
+    """Tokenizes CIRQL source code."""
+    tokens = []
+    for token_type, pattern in TOKEN_PATTERNS.items():
+        for match in re.finditer(pattern, code):
+            tokens.append((token_type, match.group()))
+    return tokens
+
+# Example Usage
+code_sample = 'define variableX = 42; if (variableX > 10) { return "Success"; }'
+tokens = lexer(code_sample)
+print(tokens)
+
+class ASTNode:
+    def __init__(self, node_type, value=None, children=None):
+        self.node_type = node_type
+        self.value = value
+        self.children = children or []
+
+class Parser:
+    def __init__(self, tokens):
+        self.tokens = tokens
+        self.pos = 0
+
+    def parse_expression(self):
+        """Parses expressions recursively."""
+        token_type, token_value = self.tokens[self.pos]
+        if token_type == "NUMBER":
+            self.pos += 1
+            return ASTNode("Literal", token_value)
+        elif token_type == "IDENTIFIER":
+            self.pos += 1
+            return ASTNode("Variable", token_value)
+        # Handle operators & nested expressions...
+
+    def parse_statement(self):
+        """Parses CIRQL statements into AST nodes."""
+        if self.tokens[self.pos][1] == "define":
+            self.pos += 1
+            var_name = self.tokens[self.pos][1]
+            self.pos += 2  # Skip '='
+            expression = self.parse_expression()
+            return ASTNode("Assignment", var_name, [expression])
+
+# Example Usage:
+parsed_ast = Parser(tokens).parse_statement()
+print(parsed_ast.node_type, parsed_ast.value)
+
+class CodeGenerator:
+    def __init__(self):
+        self.bytecode = []
+
+    def generate(self, ast_node):
+        """Converts AST into bytecode."""
+        if ast_node.node_type == "Assignment":
+            self.bytecode.append(f"STORE {ast_node.value}")
+            self.generate(ast_node.children[0])
+        elif ast_node.node_type == "Literal":
+            self.bytecode.append(f"PUSH {ast_node.value}")
+        elif ast_node.node_type == "Variable":
+            self.bytecode.append(f"LOAD {ast_node.value}")
+
+# Example Usage:
+codegen = CodeGenerator()
+codegen.generate(parsed_ast)
+print("\n".join(codegen.bytecode))
+
