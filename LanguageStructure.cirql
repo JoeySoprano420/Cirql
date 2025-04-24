@@ -124,3 +124,42 @@
     end
 ::end::
 
+::loop i from 1 to count::        # Standard loop
+>> echo "Round {{i}}"
+::end::
+
+::while user_input is not "exit":: # Condition-driven iteration
+>> ask "Enter a command" into user_input
+>> execute user_input
+::end::
+
+::repeat 5 times::                 # Fixed iteration cycle
+>> echo "Executing batch process..."
+::end::
+
+::queueEvent "sector-breach"::
+>> deployNode("Velvet-Sentry")
+>> activateShield("AmberFog")
+::end::
+
+::on "sector-breach"::             # Auto-triggered event queue
+>> echo "Sector alert initialized."
+>> triggerQueuedEvents("sector-breach")
+::end::
+
+>> trigger "sector-breach"
+
+::macro deployTactical(unit, region)::  
+>> move "{{unit}}" to "{{region}}"  
+>> scan "{{region}}"  
+>> establishOutpost("Recon-Unit")  
+::end::
+
+>> deployTactical("VioletSentinel", "Border-X7")
+
+::if threatLevel > 7::  
+>> engageCountermeasures()
+::else::  
+>> echo "Monitoring normal activity..."
+::end::
+
