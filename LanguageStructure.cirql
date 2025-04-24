@@ -6,3 +6,89 @@
 ::end::
 
 >> echo "All greetings complete."
+
+::if count > 5::
+    >> echo "That's a lot."
+::else::
+    >> echo "That's manageable."
+::end::
+
+>> define user as "Sora"
+>> define tries as 5
+
+::loop i from 1 to tries::
+    >> echo "Try {{i}}: Hello, {{user}}!"
+::end::
+
+::if tries > 3::
+    >> echo "Persistence detected. Logging award."
+::end::
+
+>> echo "Session complete."
+
+>> inspect stack
+
+::macro greet(user, times)::
+    ::loop j from 1 to times::
+        >> echo "Yo {{user}} - round {{j}}"
+    ::end::
+::end::
+
+>> greet("Juno", 2)
+
+::sequence greetUser(name, times)::
+    ::loop i from 1 to times::
+        >> echo "Welcome, {{name}} — cycle {{i}}"
+    ::end::
+::end::
+
+>> greetUser("Auri", 3)
+
+::sequence initializeDevice(device)::
+    >> echo "Waking device: {{device}}"
+    >> wait 100ms
+    >> set {{device}}.status to "ACTIVE"
+::end::
+
+::sequence bootSequence(user)::
+    >> echo "Initiating boot sequence for {{user}}"
+    >> initializeDevice("CoreUnit-7")
+    >> greetUser({{user}}, 2)
+    >> echo "All systems green."
+::end::
+
+>> bootSequence("Senn")
+
+>> define user as "Velra"
+
+::if user is not "root"::
+    ::inline greetUser(user, 1)::
+::end::
+
+::sequence scentDeploy(drone, rounds)::
+    >> echo "Priming {{drone}} for scent-run."
+    ::loop i from 1 to rounds::
+        >> emit scent.pulse via {{drone}} at round {{i}}
+        >> wait 250ms
+    ::end::
+    >> echo "{{drone}} cycle complete."
+::end::
+
+::sequence warRoutine(operator)::
+    >> echo "Field deployment for {{operator}}"
+    >> scentDeploy("VX-Rose", 4)
+    >> echo "Awaiting further commands..."
+::end::
+
+>> warRoutine("Ahkoa Nidia")
+
+::inline deployArtillery(unit, target, shots)::
+    >> echo "{{unit}} locked on {{target}}"
+    ::loop s from 1 to shots::
+        >> fire blast #{{s}} at {{target}}
+        >> wait 500ms
+    ::end::
+::end::
+
+>> deployArtillery("ThornCannon-9", "BastionGate", 3)
+
