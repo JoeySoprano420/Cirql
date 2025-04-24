@@ -163,3 +163,44 @@
 >> echo "Monitoring normal activity..."
 ::end::
 
+::if systemIntegrity < 75::  
+   >> echo "Critical integrity drop detected."
+   ::if activeCountermeasures are false::  
+      >> engageProtocol("Titanium-Rigidity")
+   ::else::  
+      >> reinforce("Outer-Bastion")
+   ::end::
+::else::  
+   >> echo "System holding stable."
+::end::
+
+::queueEvent "high-alert"::  
+>> activateShield("Vortex-Barrier")  
+>> deployCountermeasures("StormHammer")  
+>> alertAllies("Sector-9")  
+::end::
+
+::on "high-alert"::  
+>> echo "Sector on lockdown! Reinforcing defenses."  
+>> triggerQueuedEvents("high-alert")  
+::end::
+
+::macro orbitalStrike(unit, target)::  
+>> echo "Target {{target}} locked by {{unit}} orbital artillery."  
+>> chargeWeapon("SolarLance")  
+>> fireWeapon("SolarLance", "{{target}}")  
+::end::
+
+>> orbitalStrike("ZephyrCannon", "Enemy-Fortress")
+
+::if threatLevel > 8::  
+   >> engageCountermeasures()  
+   ::if defenseGrid < 50%::  
+      >> activateFailsafe("TitanCore")  
+   ::else::  
+      >> reinforceSector("Gate-9")  
+   ::end::  
+::else::  
+   >> echo "Threat assessment: stable."
+::end::
+
