@@ -929,3 +929,49 @@ codegen = CodeGenerator()
 codegen.generate(parsed_ast)
 print("\n".join(codegen.bytecode))
 
+import re
+
+TOKEN_PATTERNS = {
+    "KEYWORD": r"\b(if|else|loop|while|macro|sequence|aot|trigger|on)\b",
+    "OPERATOR": r"[\+\-\*/%=!&|<>]+",
+    "NUMBER": r"\b\d+(\.\d+)?\b",
+    "STRING": r"\".*?\"",
+    "IDENTIFIER": r"\b[a-zA-Z_][a-zA-Z0-9_]*\b",
+    "MACRO": r"::\w+.*?::",
+    "BLOCK": r"\{.*?\}",
+}
+
+def super_lexer(code):
+    """Tokenizes CIRQL source code with adaptive processing."""
+    tokens = []
+    for token_type, pattern in TOKEN_PATTERNS.items():
+        for match in re.finditer(pattern, code):
+            tokens.append((token_type, match.group()))
+    return tokens
+
+# Example Usage
+tokens = super_lexer('::macro deployTactical(unit, region):: >> move "{{unit}}" to "{{region}}" >> scan "{{region}}" ::end::')
+print(tokens)
+
+import random
+
+class NeuralPredictor:
+    def __init__(self):
+        self.memory = {}
+
+    def observe(self, event, likelihood):
+        """Stores event predictions dynamically."""
+        self.memory[event] = likelihood
+
+    def predict(self, event):
+        """Returns weighted decision probability."""
+        return self.memory.get(event, random.uniform(0.4, 0.9))  # Default range
+
+# Example Usage:
+predictor = NeuralPredictor()
+predictor.observe("sector-breach", 0.89)
+predictor.observe("emergency-lockdown", 0.76)
+
+predicted_risk = predictor.predict("sector-breach")
+print(f"Sector Breach Probability: {predicted_risk * 100:.2f}%")
+
