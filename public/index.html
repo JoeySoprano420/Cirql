@@ -508,3 +508,143 @@
       const data = event
 ::contentReference[oaicite:19]{index=19}
  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VACU Tactical Console</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" />
+  <style>
+    body {
+      margin: 0;
+      background-color: #1e1e2f;
+    }
+    #terminal {
+      height: 100vh;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="terminal"></div>
+  <script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
+  <script>
+    const term = new Terminal({
+      cursorBlink: true,
+      theme: {
+        background: '#1e1e2f',
+        foreground: '#e0e0ff'
+      }
+    });
+    term.open(document.getElementById('terminal'));
+    term.write('VACU Tactical Console v1.0\\r\\n');
+    term.write('Type a CIRQL trigger and press Enter...\\r\\n> ');
+
+    const socket = new WebSocket(`ws://${location.host}`);
+
+    let commandHistory = [];
+    let historyIndex = -1;
+    let currentInput = '';
+    const commands = ['sector-breach', 'noctoria-signal', 'stasis-emergency'];
+
+    function prompt() {
+      term.write('\\r\\n> ');
+    }
+
+    function clearLine() {
+      term.write('\\x1b[2K\\r> ');
+    }
+
+    function writeInput() {
+      clearLine();
+      term.write(currentInput);
+    }
+
+    function highlightSyntax(command) {
+      // Simple example: color 'echo' in green, strings in yellow
+      if (command.startsWith('echo')) {
+        term.write('\\x1b[32m' + 'echo' + '\\x1b[0m');
+        const rest = command.slice(4);
+        const match = rest.match(/'(.*)'/);
+        if (match) {
+          term.write(" \\x1b[33m'" + match[1] + "'\\x1b[0m");
+        } else {
+          term.write(rest);
+        }
+      } else {
+        term.write(command);
+      }
+    }
+
+    term.onKey(({ key, domEvent }) => {
+      const printable = !domEvent.altKey && !domEvent.ctrlKey && !domEvent.metaKey;
+
+      if (domEvent.key === 'Enter') {
+        term.write('\\r\\n');
+        if (currentInput.length > 0) {
+          commandHistory.push(currentInput);
+          historyIndex = commandHistory.length;
+          socket.send(currentInput);
+        }
+        currentInput = '';
+        prompt();
+      } else if (domEvent.key === 'Backspace') {
+        if (currentInput.length > 0) {
+          currentInput = currentInput.slice(0, -1);
+          clearLine();
+          term.write(currentInput);
+        }
+      } else if (domEvent.key === 'ArrowUp') {
+        if (historyIndex > 0) {
+          historyIndex--;
+          currentInput = commandHistory[historyIndex];
+          writeInput();
+        }
+      } else if (domEvent.key === 'ArrowDown') {
+        if (historyIndex < commandHistory.length - 1) {
+          historyIndex++;
+          currentInput = commandHistory[historyIndex];
+          writeInput();
+        } else {
+          historyIndex = commandHistory.length;
+          currentInput = '';
+          writeInput();
+        }
+      } else if (domEvent.key === 'Tab') {
+        domEvent.preventDefault();
+        const matches = commands.filter(cmd => cmd.startsWith(currentInput));
+        if (matches.length === 1) {
+          currentInput = matches[0];
+          writeInput();
+        } else if (matches.length > 1) {
+          term.write('\\r\\n');
+          matches.forEach(match => term.write(match + '\\r\\n'));
+          prompt();
+          term.write(currentInput);
+        }
+      } else if (printable) {
+        currentInput += key;
+        term.write(key);
+      }
+    });
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.error) {
+        term.write(`\\r\\n[Error] ${data.error}`);
+      } else {
+        term.write(`\\r\\n[Trigger] ${data.event}\\r\\n`);
+        term.write(`[Block] ${data.blockName}\\r\\n`);
+        data.commands.forEach(cmd => {
+          term.write('→ ');
+          highlightSyntax(cmd);
+          term.write('\\r\\n');
+        });
+      }
+      prompt();
+    };
+  </script>
+</body>
+</html>
+
