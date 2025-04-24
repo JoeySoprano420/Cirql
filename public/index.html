@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VACU Tactical Console</title>
+  <style>
+    body {
+      background-color: #1e1e2f;
+      color: #e0e0ff;
+      font-family: monospace;
+      padding: 20px;
+    }
+    #log {
+      white-space: pre-wrap;
+      background-color: #2e2e3f;
+      padding: 10px;
+      height: 300px;
+      overflow-y: scroll;
+      border: 1px solid #444;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      background-color: #1e1e2f;
+      color: #e0e0ff;
+      border: 1px solid #444;
+    }
+  </style>
+</head>
+<body>
+  <h1>VACU Tactical Console</h1>
+  <div id="log"></div>
+  <input id="input" placeholder="Type CIRQL trigger and press Enter..." />
+  <script>
+    const log = document.getElementById('log');
+    const input = document.getElementById('input');
+    const ws = new WebSocket(`ws://${location.host}`);
+
+    ws.onmessage = (event) => {
+      log.textContent += `\n[Broadcast] ${event.data}`;
+      log.scrollTop = log.scrollHeight;
+    };
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const message = input.value;
+        ws.send(message);
+        log.textContent += `\n[You] ${message}`;
+        input.value = '';
+      }
+    });
+  </script>
+</body>
+</html>
