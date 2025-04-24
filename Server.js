@@ -126,3 +126,37 @@ server.listen(PORT, () => {
   console.log(`Server is listening on http://localhost:${PORT}`);
 });
 
+let commandHistory = [];
+let historyIndex = -1;
+
+term.onKey(({ key, domEvent }) => {
+  if (domEvent.key === 'Enter') {
+    const command = currentInput.trim();
+    if (command) {
+      commandHistory.push(command);
+      historyIndex = commandHistory.length;
+      // Send command to backend
+    }
+    currentInput = '';
+  } else if (domEvent.key === 'ArrowUp') {
+    if (historyIndex > 0) {
+      historyIndex--;
+      currentInput = commandHistory[historyIndex];
+      // Display currentInput in terminal
+    }
+  } else if (domEvent.key === 'ArrowDown') {
+    if (historyIndex < commandHistory.length - 1) {
+      historyIndex++;
+      currentInput = commandHistory[historyIndex];
+      // Display currentInput in terminal
+    } else {
+      historyIndex = commandHistory.length;
+      currentInput = '';
+      // Clear terminal input
+    }
+  } else {
+    currentInput += key;
+    // Display key in terminal
+  }
+});
+
