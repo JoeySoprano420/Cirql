@@ -92,3 +92,25 @@
 
 >> deployArtillery("ThornCannon-9", "BastionGate", 3)
 
+::sequence scentPulse(drone)::
+    >> let intensity be random(1, 10)
+    >> echo "{{drone}} emits pulse at intensity {{intensity}}"
+::end::
+
+>> scentPulse("VelvetEmitter-XZ")
+
+>> ask "Who do you serve?" into allegiance
+
+::if allegiance is "Noctoria"::
+    >> echo "You walk in mystery and shadow..."
+::else::
+    >> echo "That path is not yet chosen."
+::end::
+
+::on "emergency-breakout"::
+    >> echo "ALERT! Perimeter breach detected!"
+    >> deployArtillery("DefenseUnit-9", "Sector-7", 3)
+::end::
+
+>> trigger "emergency-breakout"
+
